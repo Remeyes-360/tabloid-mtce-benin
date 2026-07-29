@@ -71,14 +71,14 @@ body {
   text-transform: uppercase;
 }
 
-.sectors-nav {
+.sectors-nav, .secteur-nav {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
-.sectors-nav a {
+.sectors-nav a, .secteur-nav a {
   background: #003a87;
   border: 1px solid #1a5cc0;
   padding: 8px 14px;
@@ -88,13 +88,10 @@ body {
   font-size: 13px;
   font-weight: 700;
   transition: background 0.2s, color 0.2s;
+  margin-right: 4px;
 }
 
-.sectors-nav a::after {
-  content: '';
-}
-
-.sectors-nav a:hover {
+.sectors-nav a:hover, .secteur-nav a:hover {
   background: #fff;
   color: #003a87;
 }

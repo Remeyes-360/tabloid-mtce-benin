@@ -34,3 +34,15 @@ body {
 .card .meta { font-size: 11px; color: #778; display: flex; justify-content: space-between; }
 .card a { color: #0b3d2e; font-weight: 600; }
 .footer { text-align: center; padding: 24px; font-size: 12px; color: #889; }
+
+.secteur-nav { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.secteur-nav a { background: #fff; border: 1px solid #ddd; padding: 8px 14px; border-radius: 20px; text-decoration: none; color: #0b3d2e; font-size: 13px; font-weight: 600; }
+.secteur-nav a:hover { background: #0b3d2e; color: #fff; }
+.secteur-section { margin-bottom: 32px; }
+.secteur-section h2 { font-size: 18px; font-weight: 700; margin: 24px 0 12px; color: #0b3d2e; border-left: 4px solid #c8a02a; padding-left: 10px; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 16px; }
+.no-data { background: #fff; border-radius: 8px; padding: 16px; color: #778; font-size: 13px; font-style: italic; border-left: 4px solid #ddd; }
+.badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+.badge-high { background: #fde2e2; color: #b91c1c; }
+.badge-medium { background: #fef3c7; color: #92400e; }
+.badge-low { background: #dbeafe; color: #1e40af; }

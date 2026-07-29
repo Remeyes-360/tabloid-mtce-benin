@@ -9,24 +9,32 @@ export interface FeedSource {
   url: string;
 }
 
-// Sources RSS exclusivement en langue francaise (fr.allafrica.com + versions FR des organisations)
+// Sources RSS par secteur, alignees sur la liste officielle du Google Doc.
+// Note: certaines organisations (UNWTO, ICAO, WTTC, WCO, UNCTAD, UNIDO, OCDE, AfCFTA, CEDEAO, UA, MIGA, IFC)
+// ne publient pas de flux RSS public ou bloquent l'acces automatise (Cloudflare/403/404).
+// Pour ces cas, un relais AllAfrica en francais filtre par mots-cles sectoriels est utilise comme source de repli
+// afin de garantir un contenu francophone fiable et a jour, en attendant un acces direct stable.
 export const sources: FeedSource[] = [
-  // Tourisme
+  // Tourisme : UNWTO, ICAO, WTTC, AfDB, fDi Intelligence
+  { secteur: 'Tourisme', nom: 'BAD Actualites', url: 'https://afdb.africa-newsroom.com/press?lang=fr&format=rss' },
   { secteur: 'Tourisme', nom: 'AllAfrica Tourisme', url: 'https://fr.allafrica.com/tools/headlines/rdf/tourism/headlines.rdf' },
-  { secteur: 'Tourisme', nom: 'AllAfrica Afrique de l\'Ouest', url: 'https://fr.allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf' },
   { secteur: 'Tourisme', nom: 'AllAfrica Benin', url: 'https://fr.allafrica.com/tools/headlines/rdf/benin/headlines.rdf' },
-  // Commerce exterieur
+
+  // Commerce exterieur : OMC, Trade Map, UNCTAD, OMD, Banque Mondiale
   { secteur: 'Commerce exterieur', nom: 'OMC Actualites', url: 'https://www.wto.org/library/rss/latest_news_f.xml' },
   { secteur: 'Commerce exterieur', nom: 'AllAfrica Commerce', url: 'https://fr.allafrica.com/tools/headlines/rdf/tradeafrica/headlines.rdf' },
   { secteur: 'Commerce exterieur', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
-  // Industrie
-  { secteur: 'Industrie', nom: 'AllAfrica Business', url: 'https://fr.allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
+
+  // Industrie : ONUDI, BAD, Banque Mondiale, UNCTAD, OCDE
   { secteur: 'Industrie', nom: 'BAD Actualites', url: 'https://afdb.africa-newsroom.com/press?lang=fr&format=rss' },
-  // Investissements prives
-  { secteur: 'Investissements prives', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
+  { secteur: 'Industrie', nom: 'AllAfrica Business', url: 'https://fr.allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
+
+  // Investissements prives : UNCTAD, Groupe Banque Mondiale, fDi Intelligence, MIGA, IFC
   { secteur: 'Investissements prives', nom: 'BAD Actualites', url: 'https://afdb.africa-newsroom.com/press?lang=fr&format=rss' },
+  { secteur: 'Investissements prives', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
   { secteur: 'Investissements prives', nom: 'AllAfrica Business', url: 'https://fr.allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
-  // Integration africaine
+
+  // Integration africaine : Secretariat ZLECAf, CEDEAO, Union Africaine, UNCTAD
   { secteur: 'Integration africaine', nom: 'AllAfrica Afrique de l\'Ouest', url: 'https://fr.allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf' },
   { secteur: 'Integration africaine', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
 ];
@@ -98,7 +106,6 @@ const SECTEURS = ['Tourisme', 'Commerce exterieur', 'Industrie', 'Investissement
 export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string; live: boolean }> {
   const results: Info[] = [];
   const secteurSuccess: Record<string, boolean> = {};
-
   await Promise.all(
     sources.map(async (src) => {
       try {
@@ -128,14 +135,12 @@ export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string
       }
     })
   );
-
   const anySuccess = Object.keys(secteurSuccess).length > 0;
   const bySecteur: Record<string, Info[]> = {};
   results.forEach((r) => {
     if (!bySecteur[r.secteur]) bySecteur[r.secteur] = [];
     bySecteur[r.secteur].push(r);
   });
-
   const finalResults: Info[] = [];
   SECTEURS.forEach((sec) => {
     const arr = bySecteur[sec];
@@ -147,10 +152,8 @@ export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string
       finalResults.push(...fallbackForSecteur.slice(0, 6));
     }
   });
-
   if (!anySuccess) {
     return { items: fallbackInfos, updatedAt: new Date().toISOString(), live: false };
   }
-
   return { items: finalResults, updatedAt: new Date().toISOString(), live: true };
 }

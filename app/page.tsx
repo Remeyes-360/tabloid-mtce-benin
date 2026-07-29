@@ -17,6 +17,11 @@ export default async function Home() {
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const heureMaj = new Date(updatedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
+  const rangees: string[][] = [];
+  for (let i = 0; i < secteurs.length; i += 2) {
+    rangees.push(secteurs.slice(i, i + 2));
+  }
+
   return (
     <>
       <header className="header">
@@ -34,39 +39,37 @@ export default async function Home() {
           <div className="kpi"><div className="value">{kpis.secteursActifs}</div><div className="label">Secteurs actifs</div></div>
           <div className="kpi"><div className="value">{kpis.sources}</div><div className="label">Sources du jour</div></div>
         </div>
-
         <nav className="secteur-nav">
           {secteurs.map((s) => (
             <a key={s} href={`#${s}`}>{s}</a>
           ))}
         </nav>
-
-        {secteurs.map((secteur) => {
-          const items = infos.filter((i) => i.secteur === secteur);
-          return (
-            <section key={secteur} id={secteur} className="secteur-section">
-              <h2>{secteur}</h2>
-              {items.length === 0 ? (
-                <div className="no-data">Aucune actualite disponible pour ce secteur actuellement. Nouvelle tentative automatique dans le cadre du rafraichissement horaire.</div>
-              ) : (
-                <div className="cards-grid">
-                  {items.map((info) => (
-                    <div key={info.id} className="card">
-                      <span className={`badge badge-${info.priorite}`}>
-                        {info.priorite === 'high' ? 'Priorite elevee' : info.priorite === 'medium' ? 'Priorite moyenne' : 'Veille informative'}
-                      </span>
-                      <h3>{info.titre}</h3>
-                      <p>{info.resume}</p>
-                      <div className="meta">{info.source} - {info.pays} &middot; {info.date}</div>
-                      <a href={info.url} target="_blank" rel="noopener noreferrer">Source primaire &rarr;</a>
+        {rangees.map((rangee, idx) => (
+          <div key={idx} className="secteurs-rangee">
+            {rangee.map((secteur) => {
+              const items = infos.filter((i) => i.secteur === secteur);
+              return (
+                <section key={secteur} id={secteur} className="secteur-section">
+                  <h2>{secteur}</h2>
+                  {items.length === 0 ? (
+                    <div className="no-data">Aucune actualite disponible pour ce secteur actuellement. Nouvelle tentative automatique dans le cadre du rafraichissement horaire.</div>
+                  ) : (
+                    <div className="cards-grid">
+                      {items.map((info) => (
+                        <div key={info.id} className="card">
+                          <h3>{info.titre}</h3>
+                          <p>{info.resume}</p>
+                          <div className="meta">{info.source} - {info.pays} · {info.date}</div>
+                          <a href={info.url} target="_blank" rel="noopener noreferrer">Source primaire →</a>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
-            </section>
-          );
-        })}
-
+                  )}
+                </section>
+              );
+            })}
+          </div>
+        ))}
         <footer className="footer">
           Plateforme de veille strategique - Ministere du Tourisme, du Commerce exterieur, de l'Industrie, de la Promotion des investissements prives et de l'Integration africaine du Benin. Mise a jour automatique toutes les heures.
         </footer>

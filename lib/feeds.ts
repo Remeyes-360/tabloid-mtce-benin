@@ -10,14 +10,40 @@ export interface FeedSource {
 }
 
 export const sources: FeedSource[] = [
+  // Tourisme (5 sources)
   { secteur: 'Tourisme', nom: 'UNWTO News', url: 'https://www.unwto.org/rss.xml' },
   { secteur: 'Tourisme', nom: 'AllAfrica Tourism', url: 'https://allafrica.com/tools/headlines/rdf/tourism/headlines.rdf' },
+  { secteur: 'Tourisme', nom: 'WTTC News', url: 'https://wttc.org/news/rss' },
+  { secteur: 'Tourisme', nom: 'eTurboNews Africa', url: 'https://www.eturbonews.com/africa/feed/' },
+  { secteur: 'Tourisme', nom: 'Travel Daily News', url: 'https://www.traveldailynews.com/feed/' },
+
+  // Commerce exterieur (5 sources)
   { secteur: 'Commerce exterieur', nom: 'WTO News', url: 'https://www.wto.org/library/rss/latest_news_e.xml' },
   { secteur: 'Commerce exterieur', nom: 'AllAfrica Trade', url: 'https://allafrica.com/tools/headlines/rdf/tradeafrica/headlines.rdf' },
+  { secteur: 'Commerce exterieur', nom: 'ITC Trade News', url: 'https://www.intracen.org/rss.xml' },
+  { secteur: 'Commerce exterieur', nom: 'UNCTAD News', url: 'https://unctad.org/rss.xml' },
+  { secteur: 'Commerce exterieur', nom: 'AllAfrica Economy', url: 'https://allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
+
+  // Industrie (5 sources)
   { secteur: 'Industrie', nom: 'AllAfrica Business', url: 'https://allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
+  { secteur: 'Industrie', nom: 'UNIDO News', url: 'https://www.unido.org/api/opentext/news/rss' },
+  { secteur: 'Industrie', nom: 'AfDB News', url: 'https://www.afdb.org/en/news-and-events/rss' },
+  { secteur: 'Industrie', nom: 'World Bank News', url: 'https://www.worldbank.org/en/news/all.rss' },
+  { secteur: 'Industrie', nom: 'AllAfrica Manufacturing', url: 'https://allafrica.com/tools/headlines/rdf/manufacturing/headlines.rdf' },
+
+  // Investissements prives (5 sources)
   { secteur: 'Investissements prives', nom: 'AllAfrica Economy', url: 'https://allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
+  { secteur: 'Investissements prives', nom: 'World Bank News', url: 'https://www.worldbank.org/en/news/all.rss' },
+  { secteur: 'Investissements prives', nom: 'AfDB News', url: 'https://www.afdb.org/en/news-and-events/rss' },
+  { secteur: 'Investissements prives', nom: 'IFC News', url: 'https://www.ifc.org/en/rss-feed' },
+  { secteur: 'Investissements prives', nom: 'AllAfrica Business', url: 'https://allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
+
+  // Integration africaine (5 sources)
   { secteur: 'Integration africaine', nom: 'African Union Press', url: 'https://au.int/en/rss.xml' },
   { secteur: 'Integration africaine', nom: 'AllAfrica West Africa', url: 'https://allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf' },
+  { secteur: 'Integration africaine', nom: 'ECOWAS News', url: 'https://www.ecowas.int/feed/' },
+  { secteur: 'Integration africaine', nom: 'AllAfrica Economy', url: 'https://allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
+  { secteur: 'Integration africaine', nom: 'AfCFTA Secretariat', url: 'https://au-afcfta.org/feed/' },
 ];
 
 const KEYWORDS_BENIN = ['benin', 'cotonou', 'zlecaf', 'afcfta', 'cedeao', 'ecowas', 'uemoa', 'afrique de l\'ouest', 'west africa'];
@@ -40,9 +66,11 @@ function qualifier(text: string): string {
   return 'Veille';
 }
 
+const SECTEURS = ['Tourisme', 'Commerce exterieur', 'Industrie', 'Investissements prives', 'Integration africaine'];
+
 export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string; live: boolean }> {
   const results: Info[] = [];
-  let anySuccess = false;
+  const secteurSuccess: Record<string, boolean> = {};
 
   await Promise.all(
     sources.map(async (src) => {
@@ -66,27 +94,37 @@ export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string
             url: item.link || src.url,
           });
         });
-        if (entries.length > 0) anySuccess = true;
+        if (entries.length > 0) secteurSuccess[src.secteur] = true;
       } catch (e) {
         // Source indisponible : ignoree silencieusement
       }
     })
   );
 
-  if (!anySuccess) {
-    return { items: fallbackInfos, updatedAt: new Date().toISOString(), live: false };
-  }
+  const anySuccess = Object.keys(secteurSuccess).length > 0;
 
   const bySecteur: Record<string, Info[]> = {};
   results.forEach((r) => {
     if (!bySecteur[r.secteur]) bySecteur[r.secteur] = [];
     bySecteur[r.secteur].push(r);
   });
+
   const finalResults: Info[] = [];
-  Object.values(bySecteur).forEach((arr) => {
-    arr.sort((a, b) => (a.date < b.date ? 1 : -1));
-    finalResults.push(...arr.slice(0, 6));
+  SECTEURS.forEach((sec) => {
+    const arr = bySecteur[sec];
+    if (arr && arr.length > 0) {
+      arr.sort((a, b) => (a.date < b.date ? 1 : -1));
+      finalResults.push(...arr.slice(0, 6));
+    } else {
+      // Aucune source live pour ce secteur : on complete avec le fallback local
+      const fallbackForSecteur = fallbackInfos.filter((f) => f.secteur === sec);
+      finalResults.push(...fallbackForSecteur.slice(0, 6));
+    }
   });
+
+  if (!anySuccess) {
+    return { items: fallbackInfos, updatedAt: new Date().toISOString(), live: false };
+  }
 
   return { items: finalResults, updatedAt: new Date().toISOString(), live: true };
 }

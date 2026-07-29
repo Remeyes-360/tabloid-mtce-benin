@@ -1,5 +1,5 @@
 import Parser from 'rss-parser';
-import { infos as fallbackInfos, Info, Priorite } from './data';
+import { infos as fallbackInfos, tourismeInfos, Info, Priorite } from './data';
 
 const parser = new Parser({ timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible; TabloidMTCEBot/1.0)' } });
 
@@ -10,16 +10,14 @@ export interface FeedSource {
 }
 
 // Sources RSS par secteur, alignees sur la liste officielle du Google Doc.
-// Note: certaines organisations (UNWTO, ICAO, WTTC, WCO, UNCTAD, UNIDO, OCDE, AfCFTA, CEDEAO, UA, MIGA, IFC)
-// ne publient pas de flux RSS public ou bloquent l'acces automatise (Cloudflare/403/404).
-// Pour ces cas, un relais AllAfrica en francais filtre par mots-cles sectoriels est utilise comme source de repli
-// afin de garantir un contenu francophone fiable et a jour, en attendant un acces direct stable.
+// Note: Tourisme n'a pas de flux RSS ici car les 5 sources officielles requises
+// (UN Tourism, ICAO, WTTC, AfDB, fDi Intelligence) ne publient pas de flux RSS public
+// exploitable. Le secteur Tourisme utilise donc exclusivement le contenu curate
+// (tourismeInfos dans data.ts), avec liens directs vers les pages officielles.
+// Pour les autres secteurs, certaines organisations (UNCTAD, WCO, UNIDO, OCDE, AfCFTA,
+// CEDEAO, UA, MIGA, IFC) bloquent aussi l'acces automatise (Cloudflare/403/404) : un relais
+// AllAfrica en francais filtre par mots-cles sectoriels sert alors de source de repli.
 export const sources: FeedSource[] = [
-  // Tourisme : UNWTO, ICAO, WTTC, AfDB, fDi Intelligence
-  { secteur: 'Tourisme', nom: 'BAD Actualites', url: 'https://afdb.africa-newsroom.com/press?lang=fr&format=rss' },
-  { secteur: 'Tourisme', nom: 'AllAfrica Tourisme', url: 'https://fr.allafrica.com/tools/headlines/rdf/tourism/headlines.rdf' },
-  { secteur: 'Tourisme', nom: 'AllAfrica Benin', url: 'https://fr.allafrica.com/tools/headlines/rdf/benin/headlines.rdf' },
-
   // Commerce exterieur : OMC, Trade Map, UNCTAD, OMD, Banque Mondiale
   { secteur: 'Commerce exterieur', nom: 'OMC Actualites', url: 'https://www.wto.org/library/rss/latest_news_f.xml' },
   { secteur: 'Commerce exterieur', nom: 'AllAfrica Commerce', url: 'https://fr.allafrica.com/tools/headlines/rdf/tradeafrica/headlines.rdf' },
@@ -135,12 +133,15 @@ export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string
       }
     })
   );
+  // Le secteur Tourisme est toujours alimente par le contenu curate officiel
+  secteurSuccess['Tourisme'] = true;
   const anySuccess = Object.keys(secteurSuccess).length > 0;
   const bySecteur: Record<string, Info[]> = {};
   results.forEach((r) => {
     if (!bySecteur[r.secteur]) bySecteur[r.secteur] = [];
     bySecteur[r.secteur].push(r);
   });
+  bySecteur['Tourisme'] = tourismeInfos;
   const finalResults: Info[] = [];
   SECTEURS.forEach((sec) => {
     const arr = bySecteur[sec];

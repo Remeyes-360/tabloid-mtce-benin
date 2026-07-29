@@ -1,5 +1,5 @@
 import Parser from 'rss-parser';
-import { infos as fallbackInfos, tourismeInfos, Info, Priorite } from './data';
+import { infos as fallbackInfos, tourismeInfos, industrieInfos, investissementsInfos, integrationInfos, Info, Priorite } from './data';
 
 const parser = new Parser({ timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible; TabloidMTCEBot/1.0)' } });
 
@@ -10,31 +10,17 @@ export interface FeedSource {
 }
 
 // Sources RSS par secteur, alignees sur la liste officielle du Google Doc.
-// Note: Tourisme n'a pas de flux RSS ici car les 5 sources officielles requises
-// (UN Tourism, ICAO, WTTC, AfDB, fDi Intelligence) ne publient pas de flux RSS public
-// exploitable. Le secteur Tourisme utilise donc exclusivement le contenu curate
-// (tourismeInfos dans data.ts), avec liens directs vers les pages officielles.
-// Pour les autres secteurs, certaines organisations (UNCTAD, WCO, UNIDO, OCDE, AfCFTA,
-// CEDEAO, UA, MIGA, IFC) bloquent aussi l'acces automatise (Cloudflare/403/404) : un relais
-// AllAfrica en francais filtre par mots-cles sectoriels sert alors de source de repli.
+// Seul le secteur Commerce exterieur est alimente par des flux RSS publics exploitables.
+// Les secteurs Tourisme, Industrie, Investissements prives et Integration africaine
+// utilisent exclusivement le contenu curate (data.ts), car leurs sources officielles
+// requises (UN Tourism, ICAO, WTTC, AfDB, fDi Intelligence, UNIDO, World Bank, UNCTAD,
+// OECD Development Centre, MIGA, IFC, AfCFTA Secretariat, ECOWAS Commission, African Union)
+// ne publient pas de flux RSS public exploitable ou bloquent l'acces automatise (403/404/Cloudflare).
 export const sources: FeedSource[] = [
   // Commerce exterieur : OMC, Trade Map, UNCTAD, OMD, Banque Mondiale
   { secteur: 'Commerce exterieur', nom: 'OMC Actualites', url: 'https://www.wto.org/library/rss/latest_news_f.xml' },
   { secteur: 'Commerce exterieur', nom: 'AllAfrica Commerce', url: 'https://fr.allafrica.com/tools/headlines/rdf/tradeafrica/headlines.rdf' },
   { secteur: 'Commerce exterieur', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
-
-  // Industrie : ONUDI, BAD, Banque Mondiale, UNCTAD, OCDE
-  { secteur: 'Industrie', nom: 'BAD Actualites', url: 'https://afdb.africa-newsroom.com/press?lang=fr&format=rss' },
-  { secteur: 'Industrie', nom: 'AllAfrica Business', url: 'https://fr.allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
-
-  // Investissements prives : UNCTAD, Groupe Banque Mondiale, fDi Intelligence, MIGA, IFC
-  { secteur: 'Investissements prives', nom: 'BAD Actualites', url: 'https://afdb.africa-newsroom.com/press?lang=fr&format=rss' },
-  { secteur: 'Investissements prives', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
-  { secteur: 'Investissements prives', nom: 'AllAfrica Business', url: 'https://fr.allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
-
-  // Integration africaine : Secretariat ZLECAf, CEDEAO, Union Africaine, UNCTAD
-  { secteur: 'Integration africaine', nom: 'AllAfrica Afrique de l\'Ouest', url: 'https://fr.allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf' },
-  { secteur: 'Integration africaine', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
 ];
 
 const KEYWORDS_BENIN = ['benin', 'cotonou', 'zlecaf', 'afcfat', 'cedeao', 'ecowas', 'uemoa', 'afrique de l\'ouest', 'west africa'];
@@ -62,18 +48,18 @@ function decodeHtmlEntities(text: string): string {
     '&#39;': "'",
     '&apos;': "'",
     '&nbsp;': ' ',
-    '&eacute;': 'é',
-    '&egrave;': 'è',
-    '&ecirc;': 'ê',
-    '&euml;': 'ë',
-    '&agrave;': 'à',
-    '&acirc;': 'â',
-    '&ccedil;': 'ç',
-    '&ocirc;': 'ô',
-    '&ugrave;': 'ù',
-    '&ucirc;': 'û',
-    '&icirc;': 'î',
-    '&iuml;': 'ï',
+    '&eacute;': 'e',
+    '&egrave;': 'e',
+    '&ecirc;': 'e',
+    '&euml;': 'e',
+    '&agrave;': 'a',
+    '&acirc;': 'a',
+    '&ccedil;': 'c',
+    '&ocirc;': 'o',
+    '&ugrave;': 'u',
+    '&ucirc;': 'u',
+    '&icirc;': 'i',
+    '&iuml;': 'i',
   };
   Object.keys(namedEntities).forEach((entity) => {
     result = result.split(entity).join(namedEntities[entity]);
@@ -100,6 +86,14 @@ function qualifier(text: string): string {
 }
 
 const SECTEURS = ['Tourisme', 'Commerce exterieur', 'Industrie', 'Investissements prives', 'Integration africaine'];
+
+// Secteurs alimentes exclusivement par du contenu curate (pas de flux RSS)
+const CURATED_SECTEURS: Record<string, Info[]> = {
+  'Tourisme': tourismeInfos,
+  'Industrie': industrieInfos,
+  'Investissements prives': investissementsInfos,
+  'Integration africaine': integrationInfos,
+};
 
 export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string; live: boolean }> {
   const results: Info[] = [];
@@ -133,15 +127,19 @@ export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string
       }
     })
   );
-  // Le secteur Tourisme est toujours alimente par le contenu curate officiel
-  secteurSuccess['Tourisme'] = true;
+  // Les secteurs curates sont toujours alimentes par leur contenu officiel exclusif
+  Object.keys(CURATED_SECTEURS).forEach((sec) => {
+    secteurSuccess[sec] = true;
+  });
   const anySuccess = Object.keys(secteurSuccess).length > 0;
   const bySecteur: Record<string, Info[]> = {};
   results.forEach((r) => {
     if (!bySecteur[r.secteur]) bySecteur[r.secteur] = [];
     bySecteur[r.secteur].push(r);
   });
-  bySecteur['Tourisme'] = tourismeInfos;
+  Object.keys(CURATED_SECTEURS).forEach((sec) => {
+    bySecteur[sec] = CURATED_SECTEURS[sec];
+  });
   const finalResults: Info[] = [];
   SECTEURS.forEach((sec) => {
     const arr = bySecteur[sec];

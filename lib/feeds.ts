@@ -14,6 +14,7 @@ export const sources: FeedSource[] = [
   // Tourisme
   { secteur: 'Tourisme', nom: 'AllAfrica Tourisme', url: 'https://fr.allafrica.com/tools/headlines/rdf/tourism/headlines.rdf' },
   { secteur: 'Tourisme', nom: 'AllAfrica Afrique de l\'Ouest', url: 'https://fr.allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf' },
+  { secteur: 'Tourisme', nom: 'AllAfrica Benin', url: 'https://fr.allafrica.com/tools/headlines/rdf/benin/headlines.rdf' },
   // Commerce exterieur
   { secteur: 'Commerce exterieur', nom: 'OMC Actualites', url: 'https://www.wto.org/library/rss/latest_news_f.xml' },
   { secteur: 'Commerce exterieur', nom: 'AllAfrica Commerce', url: 'https://fr.allafrica.com/tools/headlines/rdf/tradeafrica/headlines.rdf' },

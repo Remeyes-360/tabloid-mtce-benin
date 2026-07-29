@@ -11,7 +11,7 @@ body {
 .tricolor-bar {
   height: 6px;
   width: 100%;
-  background: linear-gradient(90deg, #0b6e2c 0%, #0b6e2c 33%, #fcd116 33%, #fcd116 66%, #e8112d 66%, #e8112d 100%);
+  background: #fff;
 }
 
 .header {
@@ -21,7 +21,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 4px solid #fcd116;
+  border-bottom: 4px solid #fff;
 }
 
 .header h1 {
@@ -54,7 +54,7 @@ body {
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   text-align: center;
-  border-top: 3px solid #fcd116;
+  border-top: 3px solid #fff;
 }
 
 .kpi .value {
@@ -90,8 +90,12 @@ body {
   transition: background 0.2s, color 0.2s;
 }
 
+.sectors-nav a::after {
+  content: '';
+}
+
 .sectors-nav a:hover {
-  background: #fcd116;
+  background: #fff;
   color: #003a87;
 }
 
@@ -100,7 +104,7 @@ body {
   font-weight: 800;
   margin: 24px 0 12px;
   color: #fff;
-  border-left: 5px solid #fcd116;
+  border-left: 5px solid #fff;
   padding-left: 10px;
   text-transform: uppercase;
 }
@@ -116,7 +120,7 @@ body {
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  border-top: 3px solid #fcd116;
+  border-top: 3px solid #fff;
   transition: transform 0.15s;
   color: #fff;
 }
@@ -153,12 +157,12 @@ body {
   justify-content: space-between;
 }
 
-.card a { color: #fcd116; font-weight: 700; }
+.card a { color: #fff; font-weight: 700; }
 
 .footer {
   text-align: center;
   padding: 24px;
   font-size: 12px;
   color: #d6e2f5;
-  border-top: 3px solid #fcd116;
+  border-top: 3px solid #fff;
 }

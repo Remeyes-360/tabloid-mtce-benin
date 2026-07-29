@@ -9,44 +9,41 @@ export interface FeedSource {
   url: string;
 }
 
+// Sources RSS exclusivement en langue francaise (fr.allafrica.com + versions FR des organisations)
 export const sources: FeedSource[] = [
-  // Tourisme (5 sources)
-  { secteur: 'Tourisme', nom: 'UNWTO News', url: 'https://www.unwto.org/rss.xml' },
-  { secteur: 'Tourisme', nom: 'AllAfrica Tourism', url: 'https://allafrica.com/tools/headlines/rdf/tourism/headlines.rdf' },
-  { secteur: 'Tourisme', nom: 'WTTC News', url: 'https://wttc.org/news/rss' },
-  { secteur: 'Tourisme', nom: 'eTurboNews Africa', url: 'https://www.eturbonews.com/africa/feed/' },
-  { secteur: 'Tourisme', nom: 'Travel Daily News', url: 'https://www.traveldailynews.com/feed/' },
+  // Tourisme
+  { secteur: 'Tourisme', nom: 'AllAfrica Tourisme', url: 'https://fr.allafrica.com/tools/headlines/rdf/tourism/headlines.rdf' },
+  { secteur: 'Tourisme', nom: 'AllAfrica Afrique de l\'Ouest', url: 'https://fr.allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf' },
 
-  // Commerce exterieur (5 sources)
-  { secteur: 'Commerce exterieur', nom: 'WTO News', url: 'https://www.wto.org/library/rss/latest_news_e.xml' },
-  { secteur: 'Commerce exterieur', nom: 'AllAfrica Trade', url: 'https://allafrica.com/tools/headlines/rdf/tradeafrica/headlines.rdf' },
-  { secteur: 'Commerce exterieur', nom: 'ITC Trade News', url: 'https://www.intracen.org/rss.xml' },
-  { secteur: 'Commerce exterieur', nom: 'UNCTAD News', url: 'https://unctad.org/rss.xml' },
-  { secteur: 'Commerce exterieur', nom: 'AllAfrica Economy', url: 'https://allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
+  // Commerce exterieur
+  { secteur: 'Commerce exterieur', nom: 'OMC Actualites', url: 'https://www.wto.org/library/rss/latest_news_f.xml' },
+  { secteur: 'Commerce exterieur', nom: 'AllAfrica Commerce', url: 'https://fr.allafrica.com/tools/headlines/rdf/tradeafrica/headlines.rdf' },
+  { secteur: 'Commerce exterieur', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
 
-  // Industrie (5 sources)
-  { secteur: 'Industrie', nom: 'AllAfrica Business', url: 'https://allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
-  { secteur: 'Industrie', nom: 'UNIDO News', url: 'https://www.unido.org/api/opentext/news/rss' },
-  { secteur: 'Industrie', nom: 'AfDB News', url: 'https://www.afdb.org/en/news-and-events/rss' },
-  { secteur: 'Industrie', nom: 'World Bank News', url: 'https://www.worldbank.org/en/news/all.rss' },
-  { secteur: 'Industrie', nom: 'AllAfrica Manufacturing', url: 'https://allafrica.com/tools/headlines/rdf/manufacturing/headlines.rdf' },
+  // Industrie
+  { secteur: 'Industrie', nom: 'AllAfrica Business', url: 'https://fr.allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
+  { secteur: 'Industrie', nom: 'BAD Actualites', url: 'https://afdb.africa-newsroom.com/press?lang=fr&format=rss' },
 
-  // Investissements prives (5 sources)
-  { secteur: 'Investissements prives', nom: 'AllAfrica Economy', url: 'https://allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
-  { secteur: 'Investissements prives', nom: 'World Bank News', url: 'https://www.worldbank.org/en/news/all.rss' },
-  { secteur: 'Investissements prives', nom: 'AfDB News', url: 'https://www.afdb.org/en/news-and-events/rss' },
-  { secteur: 'Investissements prives', nom: 'IFC News', url: 'https://www.ifc.org/en/rss-feed' },
-  { secteur: 'Investissements prives', nom: 'AllAfrica Business', url: 'https://allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
+  // Investissements prives
+  { secteur: 'Investissements prives', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
+  { secteur: 'Investissements prives', nom: 'BAD Actualites', url: 'https://afdb.africa-newsroom.com/press?lang=fr&format=rss' },
+  { secteur: 'Investissements prives', nom: 'AllAfrica Business', url: 'https://fr.allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
 
-  // Integration africaine (5 sources)
-  { secteur: 'Integration africaine', nom: 'African Union Press', url: 'https://au.int/en/rss.xml' },
-  { secteur: 'Integration africaine', nom: 'AllAfrica West Africa', url: 'https://allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf' },
-  { secteur: 'Integration africaine', nom: 'ECOWAS News', url: 'https://www.ecowas.int/feed/' },
-  { secteur: 'Integration africaine', nom: 'AllAfrica Economy', url: 'https://allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
-  { secteur: 'Integration africaine', nom: 'AfCFTA Secretariat', url: 'https://au-afcfta.org/feed/' },
+  // Integration africaine
+  { secteur: 'Integration africaine', nom: 'AllAfrica Afrique de l\'Ouest', url: 'https://fr.allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf' },
+  { secteur: 'Integration africaine', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
 ];
 
 const KEYWORDS_BENIN = ['benin', 'cotonou', 'zlecaf', 'afcfta', 'cedeao', 'ecowas', 'uemoa', 'afrique de l\'ouest', 'west africa'];
+
+// Detection simple de la langue francaise (mots-outils courants)
+const FRENCH_MARKERS = [' le ', ' la ', ' les ', ' de ', ' des ', ' une ', ' un ', ' et ', ' est ', ' pour ', ' dans ', ' du ', ' au ', ' que ', ' qui ', ' avec ', ' sur ', ' ont ', ' sont ', ' cette ', ' plus ', ' entre '];
+
+function isFrench(text: string): boolean {
+  const t = ` ${text.toLowerCase()} `;
+  const hits = FRENCH_MARKERS.filter((m) => t.includes(m)).length;
+  return hits >= 3;
+}
 
 function scorePriorite(text: string): Priorite {
   const t = text.toLowerCase();
@@ -59,10 +56,10 @@ function scorePriorite(text: string): Priorite {
 function qualifier(text: string): string {
   const t = text.toLowerCase();
   if (t.includes('invest')) return 'Investissement';
-  if (t.includes('financ') || t.includes('fund')) return 'Financement';
-  if (t.includes('reform') || t.includes('policy') || t.includes('regulation')) return 'Reforme';
-  if (t.includes('partner')) return 'Partenariat';
-  if (t.includes('trade') || t.includes('commerce')) return 'Competitivite';
+  if (t.includes('financ') || t.includes('fond')) return 'Financement';
+  if (t.includes('reform') || t.includes('politique') || t.includes('regulation')) return 'Reforme';
+  if (t.includes('partenar')) return 'Partenariat';
+  if (t.includes('commerce') || t.includes('echange')) return 'Competitivite';
   return 'Veille';
 }
 
@@ -76,11 +73,12 @@ export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string
     sources.map(async (src) => {
       try {
         const feed = await parser.parseURL(src.url);
-        const entries = (feed.items || []).slice(0, 4);
+        const entries = (feed.items || []).slice(0, 6);
         entries.forEach((item, idx) => {
           const titre = item.title || 'Sans titre';
           const resume = (item.contentSnippet || item.content || '').slice(0, 220).trim() || 'Resume non disponible.';
           const text = `${titre} ${resume}`;
+          if (!isFrench(text)) return;
           results.push({
             id: `${src.secteur}-${src.nom}-${idx}-${Buffer.from(item.link || titre).toString('base64').slice(0, 8)}`,
             secteur: src.secteur,
@@ -116,7 +114,6 @@ export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string
       arr.sort((a, b) => (a.date < b.date ? 1 : -1));
       finalResults.push(...arr.slice(0, 6));
     } else {
-      // Aucune source live pour ce secteur : on complete avec le fallback local
       const fallbackForSecteur = fallbackInfos.filter((f) => f.secteur === sec);
       finalResults.push(...fallbackForSecteur.slice(0, 6));
     }

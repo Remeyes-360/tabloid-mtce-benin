@@ -14,27 +14,23 @@ export const sources: FeedSource[] = [
   // Tourisme
   { secteur: 'Tourisme', nom: 'AllAfrica Tourisme', url: 'https://fr.allafrica.com/tools/headlines/rdf/tourism/headlines.rdf' },
   { secteur: 'Tourisme', nom: 'AllAfrica Afrique de l\'Ouest', url: 'https://fr.allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf' },
-
   // Commerce exterieur
   { secteur: 'Commerce exterieur', nom: 'OMC Actualites', url: 'https://www.wto.org/library/rss/latest_news_f.xml' },
   { secteur: 'Commerce exterieur', nom: 'AllAfrica Commerce', url: 'https://fr.allafrica.com/tools/headlines/rdf/tradeafrica/headlines.rdf' },
   { secteur: 'Commerce exterieur', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
-
   // Industrie
   { secteur: 'Industrie', nom: 'AllAfrica Business', url: 'https://fr.allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
   { secteur: 'Industrie', nom: 'BAD Actualites', url: 'https://afdb.africa-newsroom.com/press?lang=fr&format=rss' },
-
   // Investissements prives
   { secteur: 'Investissements prives', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
   { secteur: 'Investissements prives', nom: 'BAD Actualites', url: 'https://afdb.africa-newsroom.com/press?lang=fr&format=rss' },
   { secteur: 'Investissements prives', nom: 'AllAfrica Business', url: 'https://fr.allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
-
   // Integration africaine
   { secteur: 'Integration africaine', nom: 'AllAfrica Afrique de l\'Ouest', url: 'https://fr.allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf' },
   { secteur: 'Integration africaine', nom: 'AllAfrica Economie', url: 'https://fr.allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
 ];
 
-const KEYWORDS_BENIN = ['benin', 'cotonou', 'zlecaf', 'afcfta', 'cedeao', 'ecowas', 'uemoa', 'afrique de l\'ouest', 'west africa'];
+const KEYWORDS_BENIN = ['benin', 'cotonou', 'zlecaf', 'afcfat', 'cedeao', 'ecowas', 'uemoa', 'afrique de l\'ouest', 'west africa'];
 
 // Detection simple de la langue francaise (mots-outils courants)
 const FRENCH_MARKERS = [' le ', ' la ', ' les ', ' de ', ' des ', ' une ', ' un ', ' et ', ' est ', ' pour ', ' dans ', ' du ', ' au ', ' que ', ' qui ', ' avec ', ' sur ', ' ont ', ' sont ', ' cette ', ' plus ', ' entre '];
@@ -43,6 +39,39 @@ function isFrench(text: string): boolean {
   const t = ` ${text.toLowerCase()} `;
   const hits = FRENCH_MARKERS.filter((m) => t.includes(m)).length;
   return hits >= 3;
+}
+
+// Decode les entites HTML (numeriques et nommees) pouvant subsister dans les titres/resumes des flux RSS
+function decodeHtmlEntities(text: string): string {
+  if (!text) return text;
+  let result = text
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)));
+  const namedEntities: Record<string, string> = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#39;': "'",
+    '&apos;': "'",
+    '&nbsp;': ' ',
+    '&eacute;': 'é',
+    '&egrave;': 'è',
+    '&ecirc;': 'ê',
+    '&euml;': 'ë',
+    '&agrave;': 'à',
+    '&acirc;': 'â',
+    '&ccedil;': 'ç',
+    '&ocirc;': 'ô',
+    '&ugrave;': 'ù',
+    '&ucirc;': 'û',
+    '&icirc;': 'î',
+    '&iuml;': 'ï',
+  };
+  Object.keys(namedEntities).forEach((entity) => {
+    result = result.split(entity).join(namedEntities[entity]);
+  });
+  return result;
 }
 
 function scorePriorite(text: string): Priorite {
@@ -75,8 +104,8 @@ export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string
         const feed = await parser.parseURL(src.url);
         const entries = (feed.items || []).slice(0, 6);
         entries.forEach((item, idx) => {
-          const titre = item.title || 'Sans titre';
-          const resume = (item.contentSnippet || item.content || '').slice(0, 220).trim() || 'Resume non disponible.';
+          const titre = decodeHtmlEntities(item.title || 'Sans titre');
+          const resume = decodeHtmlEntities((item.contentSnippet || item.content || '').slice(0, 220).trim()) || 'Resume non disponible.';
           const text = `${titre} ${resume}`;
           if (!isFrench(text)) return;
           results.push({
@@ -100,7 +129,6 @@ export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string
   );
 
   const anySuccess = Object.keys(secteurSuccess).length > 0;
-
   const bySecteur: Record<string, Info[]> = {};
   results.forEach((r) => {
     if (!bySecteur[r.secteur]) bySecteur[r.secteur] = [];

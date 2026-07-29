@@ -1,7 +1,7 @@
 import Parser from 'rss-parser';
 import { infos as fallbackInfos, Info, Priorite } from './data';
 
-const parser = new Parser({ timeout: 8000 });
+const parser = new Parser({ timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible; TabloidMTCEBot/1.0)' } });
 
 export interface FeedSource {
   secteur: string;
@@ -11,10 +11,13 @@ export interface FeedSource {
 
 export const sources: FeedSource[] = [
   { secteur: 'Tourisme', nom: 'UNWTO News', url: 'https://www.unwto.org/rss.xml' },
-  { secteur: 'Commerce exterieur', nom: 'WTO News', url: 'https://www.wto.org/english/news_e/news_e.xml' },
-  { secteur: 'Industrie', nom: 'UNIDO News', url: 'https://www.unido.org/api/opentext/news/rss' },
-  { secteur: 'Investissements prives', nom: 'World Bank News', url: 'https://www.worldbank.org/en/news/all.rss' },
+  { secteur: 'Tourisme', nom: 'AllAfrica Tourism', url: 'https://allafrica.com/tools/headlines/rdf/tourism/headlines.rdf' },
+  { secteur: 'Commerce exterieur', nom: 'WTO News', url: 'https://www.wto.org/library/rss/latest_news_e.xml' },
+  { secteur: 'Commerce exterieur', nom: 'AllAfrica Trade', url: 'https://allafrica.com/tools/headlines/rdf/tradeafrica/headlines.rdf' },
+  { secteur: 'Industrie', nom: 'AllAfrica Business', url: 'https://allafrica.com/tools/headlines/rdf/business/headlines.rdf' },
+  { secteur: 'Investissements prives', nom: 'AllAfrica Economy', url: 'https://allafrica.com/tools/headlines/rdf/economy/headlines.rdf' },
   { secteur: 'Integration africaine', nom: 'African Union Press', url: 'https://au.int/en/rss.xml' },
+  { secteur: 'Integration africaine', nom: 'AllAfrica West Africa', url: 'https://allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf' },
 ];
 
 const KEYWORDS_BENIN = ['benin', 'cotonou', 'zlecaf', 'afcfta', 'cedeao', 'ecowas', 'uemoa', 'afrique de l\'ouest', 'west africa'];
@@ -51,7 +54,7 @@ export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string
           const resume = (item.contentSnippet || item.content || '').slice(0, 220).trim() || 'Resume non disponible.';
           const text = `${titre} ${resume}`;
           results.push({
-            id: `${src.secteur}-${idx}-${Buffer.from(item.link || titre).toString('base64').slice(0, 8)}`,
+            id: `${src.secteur}-${src.nom}-${idx}-${Buffer.from(item.link || titre).toString('base64').slice(0, 8)}`,
             secteur: src.secteur,
             titre,
             resume,
@@ -65,7 +68,7 @@ export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string
         });
         if (entries.length > 0) anySuccess = true;
       } catch (e) {
-        // Source indisponible : ignoree silencieusement, fallback plus bas si aucune source ne repond
+        // Source indisponible : ignoree silencieusement
       }
     })
   );
@@ -74,6 +77,16 @@ export async function getLiveInfos(): Promise<{ items: Info[]; updatedAt: string
     return { items: fallbackInfos, updatedAt: new Date().toISOString(), live: false };
   }
 
-  results.sort((a, b) => (a.date < b.date ? 1 : -1));
-  return { items: results, updatedAt: new Date().toISOString(), live: true };
+  const bySecteur: Record<string, Info[]> = {};
+  results.forEach((r) => {
+    if (!bySecteur[r.secteur]) bySecteur[r.secteur] = [];
+    bySecteur[r.secteur].push(r);
+  });
+  const finalResults: Info[] = [];
+  Object.values(bySecteur).forEach((arr) => {
+    arr.sort((a, b) => (a.date < b.date ? 1 : -1));
+    finalResults.push(...arr.slice(0, 6));
+  });
+
+  return { items: finalResults, updatedAt: new Date().toISOString(), live: true };
 }
